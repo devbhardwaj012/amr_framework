@@ -1,0 +1,30 @@
+# --- Python Environment ---
+venv/
+env/
+.env
+.venv
+bin/
+include/
+lib/
+share/
+pyvenv.cfg
+
+# --- Secrets and Config ---
+.env
+*.env
+.secrets
+auth.json
+
+# --- Python Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- macOS System Files ---
+.DS_Store
+Thumbs.db
+
+# --- Project Specifics ---
+*.log
+results/
+data/*.csv
