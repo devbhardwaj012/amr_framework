@@ -35,6 +35,15 @@ st.markdown("""
     font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
     color: #94a3b8; white-space: pre; overflow-x: auto;
   }
+  .legend-box {
+    background: rgba(17,24,39,0.7); border: 1px solid #1e2d3d;
+    border-radius: 8px; padding: 12px 16px;
+    font-size: 0.76rem; color: #94a3b8; line-height: 1.7; margin-bottom: 12px;
+  }
+  .legend-title {
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: #38bdf8; margin-bottom: 6px; font-weight: 600;
+  }
   div[data-testid="stMetricValue"] { font-family: 'JetBrains Mono', monospace; color: #38bdf8 !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -59,6 +68,17 @@ st.markdown(
     "Download simulation data for analysis or include in your project report.</div>",
     unsafe_allow_html=True,
 )
+
+st.markdown("""
+<div class="legend-box">
+  <div class="legend-title">ℹ️ What can you download?</div>
+  <b>📋 Summary Report (.txt)</b> — Plain text overview: fleet size, battery averages, tasks completed, energy used, Q-learning stats, security stats. Perfect for your project submission.<br>
+  <b>🤖 AMR Performance CSV</b> — One row per robot with all metrics. Import into Excel or Python for your own analysis.<br>
+  <b>🔋 Battery History CSV</b> — Fleet average battery per simulation tick. Plot it to show the Energy Agent keeping battery healthy.<br>
+  <b>🛡️ Security Alerts CSV</b> — Every attack detected: timestamp, robot, attack type, anomaly score, severity.<br>
+  <b>🧠 Q-Table JSON</b> — Raw Q-table values + statistics. Proves the agent actually learned something over time.
+</div>
+""", unsafe_allow_html=True)
 st.markdown("---")
 
 # ------------------------------------------------------------------

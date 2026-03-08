@@ -81,7 +81,7 @@ class EnergyAgent(BaseAgent):
     DRAIN_IDLE    = 0.05
     CHARGE_RATE   = 2.0
 
-    LLM_SUMMARY_INTERVAL = 15   # ticks between LLM fleet summaries
+    LLM_SUMMARY_INTERVAL = 5    # ticks between LLM fleet summaries
 
     def __init__(self, bus, store, config=None):
         super().__init__("EnergyAgent", bus, store, config)
@@ -334,14 +334,21 @@ Respond with ONLY the summary text, nothing else."""
             response = self._groq_client.chat.completions.create(
                 model=self._llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=100,
+                max_tokens=120,
                 temperature=0.3,
             )
             self._llm_calls += 1
             self.llm_fleet_summary = response.choices[0].message.content.strip()
-            await self.log(f"🤖 Fleet summary: {self.llm_fleet_summary}", AlertSeverity.INFO)
+            await self.log(f"🤖 LLM Fleet Summary: {self.llm_fleet_summary}", AlertSeverity.INFO)
         except Exception as e:
-            logger.warning(f"[EnergyAgent] LLM fleet summary failed: {e}")
+            error_msg = str(e)
+            logger.warning(f"[EnergyAgent] LLM fleet summary failed: {error_msg}")
+            await self.log(f"⚠️ LLM call failed: {error_msg[:120]}", AlertSeverity.WARNING)
+            # Set a fallback so the dashboard panel always shows something
+            if not self.llm_fleet_summary:
+                self.llm_fleet_summary = (
+                    f"LLM unavailable (tick {snapshot.tick}): {error_msg[:80]}"
+                )
 
     # ------------------------------------------------------------------
     # Charging Actions (unchanged from original)

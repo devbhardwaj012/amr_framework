@@ -61,7 +61,7 @@ class SentinelAgent(BaseAgent):
     ANOMALY_SCORE_CRIT = -0.65
     ATTACK_BASE_PROB   = 0.005
     ATTACK_BURST_PROB  = 0.05
-    LLM_SUMMARY_INTERVAL = 20   # ticks between LLM security summaries
+    LLM_SUMMARY_INTERVAL = 8    # ticks between LLM security summaries
 
     def __init__(self, bus, store, config=None):
         super().__init__("SentinelAgent", bus, store, config)
@@ -146,8 +146,7 @@ class SentinelAgent(BaseAgent):
         tick = snapshot.tick
         if (self._groq_client
                 and tick > 0
-                and tick - self._last_llm_summary_tick >= self.LLM_SUMMARY_INTERVAL
-                and self._quarantines_issued > 0):
+                and tick - self._last_llm_summary_tick >= self.LLM_SUMMARY_INTERVAL):
             await self._llm_security_posture(snapshot)
             self._last_llm_summary_tick = tick
 
@@ -443,14 +442,20 @@ Respond with ONLY the summary text."""
             response = self._groq_client.chat.completions.create(
                 model=self._llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=100,
+                max_tokens=120,
                 temperature=0.3,
             )
             self._llm_calls += 1
             self.llm_security_summary = response.choices[0].message.content.strip()
             await self.log(f"🤖 Security posture: {self.llm_security_summary}", AlertSeverity.INFO)
         except Exception as e:
-            logger.warning(f"[SentinelAgent] LLM security posture failed: {e}")
+            error_msg = str(e)
+            logger.warning(f"[SentinelAgent] LLM security posture failed: {error_msg}")
+            await self.log(f"⚠️ LLM security call failed: {error_msg[:120]}", AlertSeverity.WARNING)
+            if not self.llm_security_summary:
+                self.llm_security_summary = (
+                    f"LLM unavailable (tick {snapshot.tick}): {error_msg[:80]}"
+                )
 
     # ------------------------------------------------------------------
     # Quarantine Management
